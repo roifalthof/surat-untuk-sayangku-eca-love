@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Surat Terbuka</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #ff7fa3; /* pink lebih tua */
+      text-align: center;
+      padding: 50px;
+      overflow: hidden;
+      position: relative;
+      margin: 0;
+      height: 100vh;
+    }
+
+    .background-blur {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(0px);
+      transition: backdrop-filter 0.8s ease;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .background-blur.active {
+      backdrop-filter: blur(5px);
+    }
+
+    h1 {
+      color: #b30059;
+      font-weight: 700;
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 5;
+      user-select: none;
+    }
+
+    /* ====== Dekorasi Background ====== */
+    .bg-decor::before,
+    .bg-decor::after {
+      content: '❤';
+      position: absolute;
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 400px;
+      user-select: none;
+    }
+    .bg-decor::before {
+      top: -100px;
+      left: -80px;
+      transform: rotate(-25deg);
+    }
+    .bg-decor::after {
+      bottom: -120px;
+      right: -80px;
+      transform: rotate(30deg);
+    }
+
+    /* ====== Love Rain ====== */
+    .heart {
+      position: fixed;
+      top: -10px;
+      color: #ff4d88;
+      font-size: 20px;
+      animation: fall 6s linear infinite;
+      opacity: 0.8;
+      z-index: 1;
+      user-select: none;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* ====== Amplop ====== */
+    .letter {
+      width: 260px;
+      height: 180px;
+      background: white;
+      margin: 0 auto;
+      position: relative;
+      border-radius: 10px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+      transition: transform 1s ease-in-out;
+      perspective: 1000px;
+      z-index: 5;
+      user-select: none;
+      /* Hapus border hitam */
+      border: none;
+    }
+
+    /* Garis dekoratif amplop - diubah menjadi soft */
+    .letter::before {
+      content: '';
+      position: absolute;
+      top: 25px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: transparent;
+      border-top: 2px solid rgba(179, 0, 89, 0.3); /* Warna soft */
+      clip-path: polygon(0 0, 48% 0, 50% 50%, 52% 0, 100% 0, 100% 100%, 0 100%);
+      z-index: 7;
+    }
+    .letter::after {
+      content: '';
+      position: absolute;
+      top: 26px;
+      left: 0;
+      width: 52%;
+      height: 2px;
+      background-color: rgba(179, 0, 89, 0.3); /* Warna soft */
+      clip-path: polygon(0 0, 0 100%, 100% 0);
+      z-index: 8;
+    }
+
+    /* Bulatan segel kecil di tengah bawah amplop */
+    .seal-circle {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 16px;
+      background: #e60073;
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(230, 0, 115, 0.7);
+      z-index: 9;
+    }
+
+    /* ====== Envelope top (flip effect) ====== */
+    .envelope-top {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(white 50%, #f5f5f5 50%);
+      clip-path: polygon(0 0, 100% 0, 50% 50%);
+      transform-origin: top;
+      transition: transform 1s ease-in-out;
+      border-radius: 10px 10px 0 0;
+      border-bottom: 3px solid rgba(179, 0, 89, 0.3); /* Warna soft */
+      border-top: 2px solid rgba(179, 0, 89, 0.3); /* Warna soft */
+      z-index: 10;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .letter.open .envelope-top {
+      transform: rotateX(180deg);
+    }
+
+    .envelope-stamp {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background: #ff4d88;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      z-index: 11;
+      user-select: none;
+    }
+
+    .envelope-stamp::before {
+      content: '💌';
+    }
+
+    /* ====== Kertas surat ====== */
+    .paper {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      width: 90vw;
+      max-width: 900px;
+      height: 50vh;
+      background: #ffe6ea; /* Warna merah muda soft */
+      border-radius: 12px;
+      box-shadow: 0 2px 15px rgba(179, 0, 89, 0.2);
+      opacity: 0;
+      transition: all 1.2s ease;
+      z-index: 20; /* Lebih tinggi dari background blur */
+      padding: 20px 40px 60px 40px;
+      overflow-y: auto;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      user-select: text;
+      transform-origin: bottom center;
+      /* Hapus garis atas dan ubah warna header */
+      border-top: none;
+    }
+
+    /* Header surat dengan warna merah muda soft */
+    .paper::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 15px;
+      background: linear-gradient(135deg, #ffb6c1, #ff69b4);
+      border-radius: 12px 12px 0 0;
+    }
+
+    .paper.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .paper p {
+      margin: 0;
+      font-size: 20px;
+      color: #b30059;
+      text-align: left;
+      white-space: pre-wrap;
+      font-style: italic;
+      flex-grow: 1;
+      margin-top: 10px;
+    }
+
+    /* Tombol Tutup Surat fixed di bawah kertas */
+    .close-btn {
+      margin-top: 20px;
+      align-self: center;
+      padding: 10px 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      background-color: #b30059;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      position: sticky;
+      bottom: 10px;
+      z-index: 20;
+      width: fit-content;
+      user-select: none;
+    }
+
+    .close-btn:hover {
+      background-color: #e60073;
+    }
+
+    /* ====== Tombol Buka Surat ====== */
+    #openPopup {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      background-color: #b30059;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      position: relative;
+      z-index: 20;
+      margin-top: 220px;
+      user-select: none;
+    }
+
+    #openPopup:hover {
+      background-color: #e60073;
+    }
+
+    /* ====== Alamat di kertas surat ====== */
+    .paper-address {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 28px;
+      color: #b30059;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      z-index: 16;
+      user-select: none;
+      pointer-events: none;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .paper.show .paper-address {
+      opacity: 1;
+      animation: addressFade 2s ease-in-out forwards;
+    }
+
+    @keyframes addressFade {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="background-blur" id="backgroundBlur"></div>
+  <h1>Buka ini ya sayang💌</h1>
+  <div class="bg-decor"></div>
+  <div id="loveRain"></div>
+
+  <div class="letter" id="letter" aria-label="Amplop surat">
+    <div class="envelope-top"></div>
+    <div class="envelope-stamp" aria-hidden="true"></div>
+    <div class="seal-circle" aria-hidden="true"></div>
+  </div>
+
+  <div class="paper" id="paper" aria-label="Isi surat">
+    <div class="paper-address">Untuk sayangku Eca ❤️</div>
+    <p id="typedText"></p>
+    <button class="close-btn" id="closeLetter" aria-label="Tutup surat">Tutup Surat</button>
+  </div>
+
+  <button id="openPopup" aria-label="Buka surat">Buka Surat</button>
+
+  <!-- Musik dan Efek -->
+  <audio id="bgMusic" loop preload="auto">
+    <source
+      src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1efb4e3c4a.mp3?filename=romantic-guitar-116199.mp3"
+      type="audio/mpeg"
+    />
+  </audio>
+  <audio id="flipSound" preload="auto">
+    <source
+      src="https://cdn.pixabay.com/download/audio/2022/03/09/audio_8a3f1b7a4a.mp3?filename=paper-flip-102519.mp3"
+      type="audio/mpeg"
+    />
+  </audio>
+
+  <script>
+    const openBtn = document.getElementById('openPopup');
+    const closeBtn = document.getElementById('closeLetter');
+    const letter = document.getElementById('letter');
+    const paper = document.getElementById('paper');
+    const bgMusic = document.getElementById('bgMusic');
+    const flipSound = document.getElementById('flipSound');
+    const typedText = document.getElementById('typedText');
+    const backgroundBlur = document.getElementById('backgroundBlur');
+
+    const message = `Hai Eca sayang 🌸
+
+Aku cuma mau bilang...
+Semoga hari ini kamu bahagia ya.
+Kadang dunia terasa berat, tapi kamu kuat.
+Kamu pantas untuk segala hal baik. ❤️
+
+kamu harus tetap semangatt sayang, aku kangen sama kamu yang selalu excited sama segala hal di hubungan kita tanpa batasan,
+aku selalu mencintaimu menyayangimu, aku kangen samaa kamuu 
+LOVE U SAYANG ❤️❤️❤️`;
+
+    function typeWriter(text, element, delay = 40) {
+      let i = 0;
+      element.textContent = '';
+      const typing = setInterval(() => {
+        if (i < text.length) {
+          element.textContent += text.charAt(i);
+          i++;
+        } else {
+          clearInterval(typing);
+          bgMusic.play();
+        }
+      }, delay);
+    }
+
+    function openPopupAction() {
+      // Tambah efek blur ke background
+      backgroundBlur.classList.add('active');
+      
+      openBtn.style.display = 'none';
+      letter.classList.add('open');
+      flipSound.play();
+      setTimeout(() => {
+        paper.classList.add('show');
+        setTimeout(() => {
+          typeWriter(message, typedText);
+        }, 1000);
+      }, 500);
+    }
+
+    function closeLetterAction() {
+      paper.classList.remove('show');
+      bgMusic.pause();
+      bgMusic.currentTime = 0;
+      setTimeout(() => {
+        letter.classList.remove('open');
+        typedText.textContent = '';
+        openBtn.style.display = 'inline-block';
+        
+        // Hapus efek blur dari background
+        backgroundBlur.classList.remove('active');
+      }, 600);
+    }
+
+    openBtn.addEventListener('click', openPopupAction);
+    closeBtn.addEventListener('click', closeLetterAction);
+
+    // Love rain animation
+    const loveRain = document.getElementById('loveRain');
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.classList.add('heart');
+      heart.textContent = '💖';
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.fontSize = Math.random() * 15 + 15 + 'px';
+      heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+      loveRain.appendChild(heart);
+      setTimeout(() => heart.remove(), 6000);
+    }
+    setInterval(createHeart, 250);
+  </script>
+</body>
+</html>
